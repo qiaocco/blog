@@ -2,7 +2,7 @@ name: monitor blog
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
 
   push:
     branches: [master]
