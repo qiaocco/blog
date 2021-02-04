@@ -1,0 +1,34 @@
+name: monitor blog
+
+on:
+  schedule:
+    - cron: "5 * * * *"
+
+  push:
+    branches: [master]
+
+  issues:
+    types:
+      - "opened"
+
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+          architecture: "x64"
+
+      - name: get blog status
+        run: |
+          pip install -r requirements.txt
+          python monitor.py
