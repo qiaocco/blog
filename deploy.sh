@@ -11,6 +11,15 @@ hugo # if using a theme, replace with `hugo -t <YOURTHEME>`
 # Go To Public folder
 cd public
 
+
+printf "\033[0;32mpwd...\033[0m\n"
+
+pwd
+
+printf "\033[0;32mls -al...\033[0m\n"
+
+ls -al
+
 # Add changes to git.
 git add .
 

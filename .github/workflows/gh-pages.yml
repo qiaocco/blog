@@ -3,13 +3,12 @@ name: github pages
 on:
   push:
     branches:
-      - master # Set a branch to deploy
+      - "*" # Set a branch to deploy
   issues:
-      types:
-        - "opened"
+    types:
+      - "opened"
   issue_comment:
     types: [created, edited]
-
 
 jobs:
   deploy:
