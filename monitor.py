@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 
 def send_to_wx(text, desp=None):
@@ -9,7 +10,7 @@ def send_to_wx(text, desp=None):
     url = (
         "https://sc.ftqq.com/SCU9800T1aa9ee59f94cfe6bcde0b23b4b91135d5959fab2590de.send"
     )
-    params = {"text": text, "desp": desp}
+    params = {"text": text + str(datetime.datetime.now()), "desp": desp}
     requests.get(url, params=params)
 
 
@@ -19,8 +20,9 @@ def fetch(url):
     except Exception as e:
         send_to_wx("网站异常啦", f"url={url}, {e}")
     else:
-        send_to_wx("网站正常")
+        print("网站正常")
+        # send_to_wx("网站正常")
 
 
 if __name__ == "__main__":
-    fetch("https://blog.qiaocci.com")
+    fetch("https://blog.qiaocci.com"
