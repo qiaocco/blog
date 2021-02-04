@@ -1,10 +1,8 @@
 ---
-title: "Use_github_actions"
+title: "使用github actions部署博客"
 date: 2021-02-04T22:20:24+08:00
 draft: false
 ---
-
-
 
 
 
@@ -43,7 +41,7 @@ draft: false
 name: github pages # 任务名称
 
 on: # 什么情况下会触发任务，为了方便调试，我写的情况比较多，大家可以只保留push的情况。
-  push: 
+  push:
     branches:
       - "*" # Set a branch to deploy
   issues:
