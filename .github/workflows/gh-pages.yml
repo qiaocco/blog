@@ -26,9 +26,14 @@ jobs:
           # extended: true
 
       - name: Build
-        run: sh ./deploy.sh
-      # - name: Deploy
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./public
+        run: hugo --minify
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: qiaocci/qiaocci.github.io
+          publish_branch: master # default: gh-pages
+
