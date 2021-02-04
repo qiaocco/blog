@@ -25,4 +25,4 @@ def fetch(url):
 
 
 if __name__ == "__main__":
-    fetch("https://blog.qiaocci.com"
+    fetch("https://blog.qiaocci.com")
