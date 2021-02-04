@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master # Set a branch to deploy
+  issues:
+      types:
+        - "opened"
+  issue_comment:
+    types: [created, edited]
+
 
 jobs:
   deploy:
