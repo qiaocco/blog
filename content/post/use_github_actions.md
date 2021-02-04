@@ -54,30 +54,29 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2	# 获取代码
+      - uses: actions/checkout@v2 # 获取代码
         with:
           submodules: true # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Setup Hugo	# 安装hugo
+      - name: Setup Hugo # 安装hugo
         uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: "0.79.1"
           # extended: true
 
       - name: Build
-        run: hugo --minify	# 使用minify参数，可以压缩assets文件
+        run: hugo --minify # 使用minify参数，可以压缩assets文件
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}	# 默认情况下，不能把代码推送到其他仓库。如果确实要推送，需要设置一个deploy key。设置方法见文章末尾的链接。
-          external_repository: qiaocci/qiaocci.github.io	# 静态文件仓库地址
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }} # 默认情况下，不能把代码推送到其他仓库。如果确实要推送，需要设置一个deploy key。设置方法见文章末尾的链接。
+          external_repository: qiaocci/qiaocci.github.io # 静态文件仓库地址
           publish_branch: master # default: gh-pages	# 推送的分支
-
-
+          cname: blog.qiaocci.com # 自定义域名
 ```
 
 
