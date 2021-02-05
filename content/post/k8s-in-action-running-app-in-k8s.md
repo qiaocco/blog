@@ -1,9 +1,9 @@
 ---
 
-
 title: "K8s in Action Running App in K8s"
 date: 2021-02-02T23:11:31+08:00
 draft: false
+categories: ["k8s"]
 ---
 
 
