@@ -98,7 +98,7 @@ k describe pod <pod名>
 
 创建deployment背后发生了什么?
 
-![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210201123940.png)
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210208150519.png)
 
 ### 创建服务
 
@@ -118,7 +118,7 @@ kubectl api-resources
 
 如何理解负载均衡服务?
 
-![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210201124002.png)
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210208150520.png)
 
 查看服务状态:
 
