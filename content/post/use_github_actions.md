@@ -1,6 +1,6 @@
 ---
 title: "使用github actions部署博客"
-date: 2021-02-04T22:20:24+08:00
+date: 2021-01-10T22:20:24+08:00
 draft: false
 tags: ["hugo"]
 ---
