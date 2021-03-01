@@ -192,3 +192,27 @@ curl localhost:8080
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210301231211.png)
 
 curl先连接到代理，代理连接到API server，再连接到kubelet，然后连接到对应的pod。中间涉及到的环节太多。
+
+
+
+### 5.3.1 查看日志
+
+```bash
+kubectl log kubia
+# 实时日志
+kubectl log kubia -f
+# 显示时间戳
+kubectl log kubia --timestamps=true
+# 最近两分钟的日志
+kubectl log kubia --since=2m
+# 指定开始时间
+kubectl logs kubia --since-time=2020-02-01T09:50:00Z
+# 显示最近10行
+kubectl logs kubia --tail=10
+```
+
+k8s为每个容器都单独保存了日志。日志通常存放在`/var/log/containers`目录。pod删除后，所有的日志也会删除。所以你需要指定一个中心化的日志系统。
+
+k8s中，通常应用会把日志写入标准输出及标准错误。如果不这样做，而是把日志写入文件呢？
+
+那你需要关注如何查看这些日志文件。理想情况下，你需要配置一个中心化的日志系统，但是有时候，你希望事情保持简单，而不用关系如果查看这些日志。下面的章节中，你会学习到如何将日志文件从容器中复制到你自己的电脑上。
