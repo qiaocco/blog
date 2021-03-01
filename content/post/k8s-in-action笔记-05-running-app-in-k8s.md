@@ -97,11 +97,11 @@ pod内的容器，同时也共享hostname。
 apiVersion: v1 # api版本
 kind: Pod # 类型
 metadata:
-  name: node-pod # pod名称
+  name: kubia # pod名称
 spec:
   containers:
-    - name: node-server-container # 容器名称
-      image: qiaocc/node-server:latest # 镜像
+    - name: kubia # 容器名称
+      image: qiaocc/kubia:0.1 # 镜像
       ports:
         - containerPort: 8080 # app监听端口
 ```
@@ -115,13 +115,80 @@ spec:
 kubectl apply -f kubia.yaml
 
 # 查看pod状态, -o wide 查看更多， -o yaml输出yaml格式
-kubectl get pod node-pod
+kubectl get pod kubia
 
 # 查看pod详情
-kubectl describe pod node-pod
+kubectl describe pod kubia
 
 # 查看创建pod时，发生的事件
 kubectl get events
 ```
 
 如果配置文件有更新，重新运行`kubectl apply`命令。
+
+
+
+## 5.3 与app和pod进行交互
+
+### 5.3.1 向pod中的应用发送请求
+
+#### 方法一：登录到node，发送请求
+
+1. 获取pod的ip
+
+   ```bash
+   kubectl get pod kubia -o wide
+   # output
+   NAME    READY   STATUS    RESTARTS   AGE    IP           NODE       NOMINATED NODE   READINESS GATES
+   kubia   1/1     Running   2          6d2h   172.17.0.8   minikube   <none>           <none>
+   ```
+
+   输出结果显示，kubia pod的ip是`172.17.0.8`
+
+   在k8s中，同一个node的不同pod之间可以联通，不通node的不同pod也可以联通
+
+2.  ssh登录pod所在的node，发起请求。
+
+   ```
+   minikubt ssh
+   curl 172.17.0.8:8000
+   ```
+
+应用场景：出现连接问题时，这种方法是结局问题的最短路径。
+
+
+
+#### 方法二：从一次性的pod连接
+
+```bash
+kubectl run --image=tutum/curl -it --restart=Never --rm client-pod
+
+curl 172.17.0.8:8000
+```
+
+​	这个命令创建了一次性的pod，在退出时，pod自动销毁。
+
+应用场景： 测试多个pod之间的连通性
+
+
+
+#### 方法三：端口映射
+
+在开发阶段，与pod交互最简单的方法就是端口映射。这个方法会通过代理实现网络访问。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210301230643.png)
+
+```
+kubectl port-forward kubia 8080
+
+# 本地运行
+curl localhost:8080
+```
+
+这个方法不需要查看pod的ip，可以在本地发起请求。
+
+应用场景：操作简单，但是背后原理复杂。如果背后出现问题，不好排查。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210301231211.png)
+
+curl先连接到代理，代理连接到API server，再连接到kubelet，然后连接到对应的pod。中间涉及到的环节太多。
