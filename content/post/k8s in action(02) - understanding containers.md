@@ -2,7 +2,7 @@
 title: "k8s in action(02) - understanding containers"
 date: 2021-01-02T13:51:15+08:00
 draft: false
-categories: ["k8s"]
+tags: ["k8s"]
 ---
 
 入门

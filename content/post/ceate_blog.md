@@ -2,6 +2,7 @@
 title: "搭建博客"
 date: 2021-01-01T22:29:27+08:00
 draft: false
+tags: ["blog"]
 ---
 
 1. 安装hugo `https://gohugo.io/`
