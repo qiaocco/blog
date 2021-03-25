@@ -54,7 +54,7 @@ docker run --name kubia-container -p 1234:8080 -d kubia
 docker logs kubia-container
 # 分发
 # 1. 打标签
-docker tag kubia qiaoccdocdock1./kubia:1.0
+docker tag kubia qiaocc/kubia:1.0
 # 2. 推送
 docker push qiaocc/kubia:1.0
 # 停用
