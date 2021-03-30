@@ -1,5 +1,5 @@
 ---
-![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210326185205.png)title: "k8s in action(03) - deploying your first app"
+title: "k8s in action(03) - deploying your first app"
 date: 2021-01-15T23:11:31+08:00
 draft: false
 tags: ["k8s"]
