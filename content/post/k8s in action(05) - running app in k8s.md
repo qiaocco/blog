@@ -34,7 +34,7 @@ tags: ["k8s"]
 
 假设一个应用，包含多个进程，进程间是通过ipc或shared files通信的，这就要求多个进程运行在同一台电脑上。
 
-一个容器也可以运行多个进程，但是不建议这样做。原因是：
+一个容器可以运行多个进程，但是不建议这样做。原因是：
 
 1. 无法区分不同进程的日志。默认情况下，应用将日志写到标准输出，docker可以很方便的查看日志，但是如果一个容器运行多个进程，那就无法区分日志属于哪个进程的。
 2. 容器在根进程死亡时会自动重启，不会管子进程的状态。
@@ -55,7 +55,7 @@ pod内的容器，同时也共享hostname。
 
 ### 5.1.2 Organizing containers into pods
 
-在虚拟机时代，一台虚拟机可能运行多个应用。但是在使用pod时，建议的做法是一个pod只运行一个app。app的每个进程，运行在不同的容器里。
+在虚拟机时代，一台虚拟机可以运行多个应用。但是在使用pod时，建议一个pod只运行一个应用。应用的每个进程，运行在不同的容器里。
 
 为什么不建议多个应用运行在同一个pod？
 
@@ -87,8 +87,6 @@ pod内的容器，同时也共享hostname。
 ## 5.2 通过yaml配置文件创建pod
 
 前面的章节中，我们已经学会使用命令行创建pod。这一章我们来学习使用配置文件创建pod，方便管理。
-
-
 
 ```yaml
 # kubia.yaml
@@ -196,13 +194,13 @@ curl先连接到代理，代理连接到API server，再连接到kubelet，然�
 ### 5.3.1 查看日志
 
 ```bash
-kubectl log kubia
+kubectl logs kubia
 # 实时日志
-kubectl log kubia -f
+kubectl logs kubia -f
 # 显示时间戳
-kubectl log kubia --timestamps=true
+kubectl logs kubia --timestamps=true
 # 最近两分钟的日志
-kubectl log kubia --since=2m
+kubectl logs kubia --since=2m
 # 指定开始时间
 kubectl logs kubia --since-time=2020-02-01T09:50:00Z
 # 显示最近10行
@@ -214,3 +212,18 @@ k8s为每个容器都单独保存了日志。日志通常存放在`/var/log/cont
 k8s中，通常应用会把日志写入标准输出及标准错误。如果不这样做，而是把日志写入文件呢？
 
 那你需要关注如何查看这些日志文件。理想情况下，你需要配置一个中心化的日志系统，但是有时候，你希望事情保持简单，而不用关系如果查看这些日志。下面的章节中，你会学习到如何将日志文件从容器中复制到你自己的电脑上。
+
+### 5.3.2 复制文件
+
+复制文件到本地：
+
+```bash
+kubectl cp kubia:/etc/hosts /tmp/kubia-hosts
+```
+
+复制文件到容器：
+
+```bash
+kubectl cp /etc/hosts kubia:/tmp/kubia-hosts
+```
+
