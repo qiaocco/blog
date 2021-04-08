@@ -97,7 +97,7 @@ metadata:
 spec:
   containers:
     - name: kubia # 容器名称
-      image: qiaocc/kubia:0.1 # 镜像
+      image: qiaocc/kubia:1.0 # 镜像
       ports:
         - containerPort: 8080 # app监听端口
 ```
@@ -191,7 +191,7 @@ curl先连接到代理，代理连接到API server，再连接到kubelet，然�
 
 
 
-### 5.3.1 查看日志
+### 5.3.2 查看日志
 
 ```bash
 kubectl logs kubia
@@ -213,7 +213,7 @@ k8s中，通常应用会把日志写入标准输出及标准错误。如果不�
 
 那你需要关注如何查看这些日志文件。理想情况下，你需要配置一个中心化的日志系统，但是有时候，你希望事情保持简单，而不用关系如果查看这些日志。下面的章节中，你会学习到如何将日志文件从容器中复制到你自己的电脑上。
 
-### 5.3.2 复制文件
+### 5.3.3 复制文件
 
 复制文件到本地：
 
@@ -227,3 +227,13 @@ kubectl cp kubia:/etc/hosts /tmp/kubia-hosts
 kubectl cp /etc/hosts kubia:/tmp/kubia-hosts
 ```
 
+### 5.3.4 在容器中执行命令
+
+```bash
+# 方法一：直接执行命令
+kubectl exec kubia -- ps aux
+# 方法二：进入交互shell
+kubectl exec -it kubia -- bash
+```
+
+注意：方法二并不适用于所有情况。有些容器，基于安全方面，或者容器大小方面的考量，会舍弃很多linux二进制文件，导致很多命令无法执行。这时候，你需要一个**临时容器**（*ephemeral containers*）。这个特性还在alpha阶段，以后可能会移除。
