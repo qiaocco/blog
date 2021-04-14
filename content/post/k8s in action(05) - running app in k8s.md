@@ -237,3 +237,41 @@ kubectl exec -it kubia -- bash
 ```
 
 注意：方法二并不适用于所有情况。有些容器，基于安全方面，或者容器大小方面的考量，会舍弃很多linux二进制文件，导致很多命令无法执行。这时候，你需要一个**临时容器**（*ephemeral containers*）。这个特性还在alpha阶段，以后可能会移除。
+
+### 5.3.5 attach命令
+
+用于应用读取stdin。
+
+代码参考：`chap5/kubia-stdin-image`
+
+启动pod：
+
+```bash
+kubectl apply -f kubia-stdin.yaml
+```
+
+端口转发：
+
+```bash
+kubectl port-forward kubia-stdin 8080
+```
+
+使用attach命令：
+
+```bash
+kubectl attach -i kubia-stdin
+```
+
+进入命令行交互之后，输入"hello"，然后请求服务：
+
+```bash
+curl http://127.0.0.1:8080
+```
+
+输出:
+
+```
+hello, this is kubia-stdin. Your IP is ::ffff:127.0.0.1.
+```
+
+这时候，greeting变量已经被修改了。
