@@ -275,3 +275,65 @@ hello, this is kubia-stdin. Your IP is ::ffff:127.0.0.1.
 ```
 
 这时候，greeting变量已经被修改了。
+
+
+
+## 5.4 在pod中运行多个容器
+
+目前kubia应用只支持http协议。我们想让它支持https协议。一种办法是通过修改代码，比较麻烦。另一种方法是增加sidecar应用，让其处理https协议。目前流行的组件是`Envoy`。Envoy是一个高性能的反向代理，它最初有Lyft开发，现在已经捐赠给了CNCF基金会，它也是`Service Mesh`的核心组件之一。
+
+### 5.4.1 扩展kubia，使用Envoy代理
+
+扩展之后的架构如下图：
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210414232031.png)
+
+pod中运行两个容器，Node.js和Envoy。Node.js容器处理HTTP请求，Envoy容器处理HTTPS请求。Envoy会接收HTTPS请求，通过local loopback创建HTTP请求并转发给Node.js应用。
+
+Envoy还提供了web界面。
+
+### 5.4.2 增加Envoy代理
+
+Envoy官方提供了Docker镜像，但是需要一些额外的配置。本书的作者做好配置了，我们直接拿来用就好了。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-ssl
+spec:
+  containers:
+    - name: kubia
+      image: qiaocc/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+    - name: envoy
+      image: luksa/kubia-ssl-proxy:1.0
+      ports:
+        - name: https
+          containerPort: 8443
+        - name: admin
+          containerPort: 9901
+```
+
+新的pod叫做kubia-ssl，包含两个容器：kubia和envoy。代理envoy增加了两个端口，8443是HTTPS端口，9901是web界面端口。
+
+使用`kubectl apply -f kubia-ssl.yaml`命令，创建这个pod。
+
+### 5.4.3 容器交互
+
+```bash
+# 1. 端口转发
+kubectl port-forward kubai-ssl 8080 8443 9901
+# 2. 验证http协议
+curl http://127.0.0.1:8080
+# 3. 验证https协议(自签证书，需要加--insecure)
+curl https://localhost:8443 --insecure
+# 4. 查看log
+kubectl logs kubia-ssl -c kubia
+kubectl logs kubia-ssl --all-containers
+# 5. 进入bash
+kubectl exec -it kubia-ssl -c envoy -- bash
+```
+
