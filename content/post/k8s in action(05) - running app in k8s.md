@@ -1,6 +1,6 @@
 ---
 title: "k8s in action(05) - running app in k8s"
-date: 2021-02-02T23:11:31+08:00
+date: 2021-04-14T23:11:31+08:00
 draft: false
 tags: ["k8s"]
 ---
