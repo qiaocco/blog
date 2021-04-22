@@ -1,11 +1,9 @@
 ---
 title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
-date: 2021-04-22T23:11:31+08:00
+date: 2021-04-22T18:13:42+08:00
 draft: false
 tags: ["k8s"]
 ---
-
-
 
 # 重点
 
@@ -17,3 +15,4 @@ tags: ["k8s"]
 
 
 ## 理解pod状态
+
