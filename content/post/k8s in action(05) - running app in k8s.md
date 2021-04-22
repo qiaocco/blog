@@ -337,3 +337,105 @@ kubectl logs kubia-ssl --all-containers
 kubectl exec -it kubia-ssl -c envoy -- bash
 ```
 
+
+
+## 5.5 pod启动时运行额外的容器
+
+当pod包含多个容器时，所有容器会并行(parallel)启动。k8s中，没有提供这种机制，让你能够指定容器启动的先后顺序。然而，k8s允许在主容器启动之前，启动一些初始化容器，去做初始化工作。
+
+### 5.5.1 初始化容器(init containers)
+
+init containers在主容器之前，一个接一个启动（非并行）。当所有init containers启动成功之后，主容器才会启动。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210419111815.png)
+
+作用：
+
+1. 初始化挂载卷。配置文件，下载的文件，证书。
+2. 初始化网络。
+3. 设置pod启动的前置条件。如依赖关系。
+4. 发送信号。通知外部系统。
+
+这些工作，在主容器中也可以做，为什么需要init containers呢？
+
+使用init containers不需要主容器重新构建，方便在多个应用中复用。尤其是你想在pod中，注入基础设施相关的功能时，尤其方便。
+
+另一个原因是安全。如果遇到安全问题，方便解决。
+
+例如，pod需要注册到外部系统。注册时需要secret token去鉴权。如果这一步放到主容器中做，secret token要保存在主容器中。如果遇到安全隐患，攻击者可能窃取secret token。如果放到init containers中做，会降低风险。
+
+### 5.5.2 使用init containers
+
+初始化容器定义在`initContainers`字段。我们看下pod清单：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-init
+spec:
+  initContainers:
+    - name: init-demo
+      image: qiaocc/init-demo:1.0
+    - name: network-check
+      image: qiaocc/network-connectivity-checker:1.0
+  containers:
+    - name: kubia
+      image: qiaocc/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+    - name: envoy
+      image: luksa/kubia-ssl-proxy:1.0
+      ports:
+        - name: https
+          containerPort: 8443
+        - name: admin
+          containerPort: 9901
+```
+
+例子中有两个初始化容器，第一个容器每5s打印一个输出。第二个容器通过ping命令检查网络连接。
+
+第一个初始化容器先运行，运行完成后，第二个初始化容器开始运行。两个初始化容器都运行成功后，两个普通容器同时开始运行。
+
+检查运行状态：
+
+```bash
+# 运行容器
+kubectl apply -f kubia-init.yaml
+# 检查状态
+kubectl get pods -w
+kubectl get events -w
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210419200539.png)
+
+
+
+### 5.5.3 检查容器
+
+```bash
+# 查看log。-c指定容器名字
+kubectl logs kubia-init -c network-check
+# 执行命令
+kubectl exec -it kubia-init-slow -c init-demo -- sh
+```
+
+
+
+## 5.6 删除操作
+
+
+
+```bash
+# 删除pod
+kubectl delete po kubia
+# 删除多个pod
+kubectl delete po kubia-init kubia-init-slow
+# 使用配置文件删除
+kubectl delete -f kubia-ssl.yaml
+# 删除目录下所有yaml配置
+kubectl delete -f Chapter05/
+
+```
+
