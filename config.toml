@@ -2,7 +2,7 @@ baseURL = "https://qiaocci.github.io"
 languageCode = "zh-cn"
 defaultContentLanguage = "zh-cn"                             # en / zh-cn / ... (This field determines which i18n file to use)
 title = "qiaocc's blog"
-preserveTaxonomyNames = true
+preserveTaxonomyNames = true # 若为 false，`Getting Started` 这样的英文标签将会被转换为 `getting-started` （实测好像没用。）
 enableRobotsTXT = true
 enableEmoji = true
 theme = "even"
@@ -15,7 +15,7 @@ pygmentsUseClasses = true
 pygmentsCodefencesGuessSyntax = true
 
 hasCJKLanguage = true     # has chinese/japanese/korean ? # 自动检测是否包含 中文\日文\韩文
-paginate = 5                                              # 首页每页显示的文章数
+paginate = 10                                              # 首页每页显示的文章数
 disqusShortname = ""      # disqus_shortname
 googleAnalytics = "UA-122242571-4"      # UA-XXXXXXXX-X
 copyright = ""            # default: author.name ↓        # 默认为下面配置的author.name ↓
@@ -45,9 +45,9 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
   url = "/tags/"
 [[menu.main]]
   name = "About"
-  weight = 30
-  identifier = "tags"
-  url = "/tags/"
+  weight = 40
+  identifier = "about"
+  url = "/post/about_me/"
 # [[menu.main]]
 #   name = "Categories"
 #   weight = 40
