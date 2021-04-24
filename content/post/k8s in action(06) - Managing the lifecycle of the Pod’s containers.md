@@ -95,3 +95,18 @@ kubectl get po kubia -o json | jq .status.conditions
 
 ### 6.1.3 容器的状态
 
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424105617.png)
+
+`Waiting`：容器将要启动。`reason`和`message`字段会显示原因
+
+`Running`：正在运行。`startedAt`字段代表容器启动时间。
+
+`Terminated`：进程关闭时间。`startedAt`和`finishedAt`表示启动和终止时间。`exitCode`表示主进程终止的exit code。
+
+`Unknown`：未知。
+
+```bash
+kubectl describe po kubia
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424110135.png)
