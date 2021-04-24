@@ -24,7 +24,7 @@ tags: ["k8s"]
 - pod的阶段
 - 容器状态
 
-### 6.1.1 理解pod阶段
+### 6.1.1 理解pod阶段(phase)
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210423155401.png)
 
@@ -44,4 +44,54 @@ tags: ["k8s"]
 kubectl apply -f kubia.yaml
 kubectl get po kubia -o yaml | grep phase # phase: Running
 ```
+
+还可以使用`jq`工具来格式化：
+
+```bash
+kubectl get po kubia -o json | jq .status.phase
+```
+
+
+
+### 6.1.2 理解pod condition
+
+`PodScheduled`：pod被调度到node节点
+
+`Initialized`：初始化容器(init containers)运行成功
+
+`ContainersReady`：所有的容器都准备好了
+
+`Ready`：pod准备好对外提供服务了。就绪探针返回ok。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424103407.png)
+
+从图中可以看出，`PodScheduled`和`Initialized`刚开始是未完成，很快就变成已完成。
+
+`Ready`和`ContainersReady`在pod的生命周期中，可能会变换好几次状态。
+
+之前，我们介绍过node的状态有`MemoryPressure`、`DiskPressure`、`PIDPressure` 、`Ready`。
+
+可以看出，每种k8s对象都有自身的状态值，通常他们都会有`Ready`状态。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424104525.png)
+
+如果有的阶段未完成，可以查看原因：
+
+```bash
+kubectl get po kubia -o json | jq .status.conditions
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424105122.png)
+
+`status`：是否已完成 True/False/Unknown
+
+`reason`：未完成时，显示原因。还有`message`字段显示详情
+
+`lastProbeTime`：上次检查时间
+
+`lastTransitionTime`：上次状态变化的时间
+
+
+
+### 6.1.3 容器的状态
 
