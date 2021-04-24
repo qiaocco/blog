@@ -1,6 +1,6 @@
 ---
 title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
-date: {{ .Date }}
+date: 2021-04-22T18:13:42+08:00
 draft: false
 tags: ["k8s"]
 ---
