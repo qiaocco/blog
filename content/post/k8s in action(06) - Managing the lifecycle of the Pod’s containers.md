@@ -110,3 +110,37 @@ kubectl describe po kubia
 ```
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424110135.png)
+
+
+
+## 6.2 容器的健康问题
+
+### 6.2.1 理解容器的自动重启
+
+pod调度到node后，kubelet会启动容器。当容器意外退出时，k8s会自动重启容器。
+
+```bash
+kubectl apply -f kubia-ssl.yaml
+kubectl port-forward kubia-ssl 8080 8443 9901
+
+# 观察
+kubectl get pods -w
+kubectl get events -w
+```
+
+你可以发送`KILL`信号，主动让进程退出。但是在容器中，就不能杀掉root进程（pid=1）。Envoy管理界面，提供了一个接口，可以杀掉主进程。
+
+打开`http://localhost:9901/`页面，点击`quitquitquit`按钮，主动杀掉主进程。
+
+再次查看状态
+
+```
+kubectl get pods -w
+kubectl get events -w
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210425195146.png)
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210425195047.png)
+
+pod的状态从`Running`到`NotReady` 、`CrashLoopBackOff`，最终变为`Running`。
