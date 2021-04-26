@@ -260,5 +260,36 @@ Envoy代理提供了一个`/ready`路由，暴露其状态。我们打开Envoy�
 
 
 
+### 6.2.4 实际操作
 
+```bash
+kubectl apply -f kubia-ssl.yaml
+kubectl port-forward kubia-ssl 8080 8443 9901
+# 观察kubia应用
+kubectl logs kubia-liveness -c kubia -f
+# 观察envoy
+kubectl exec kubia-liveness -c envoy -- tail -f /var/log/envoy.admin.log
+```
 
+主动将健康检查配置为失败：
+
+打开[http://localhost:9901](http://localhost:9901/)，点击`healthcheck/fail `按钮。
+
+```bash
+kubectl get events -w
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426163609.png)
+
+达到失败极限后，容器会关闭并重启。
+
+```bash
+# 查看RESTARTS，重启次数
+kubectl get po kubia-liveness
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426163955.png)
+
+State的started字段，表示新容器启动时间。
+
+Last State表示老容器的状态。Exit Code等于0，代表容器平缓结束。如果是被kill的话，exit code=137
