@@ -350,5 +350,57 @@ exec探针会调用/usr/bin/healthcheck命令，检查exec code是否为0.
 
 
 
-### 6.2.6 启动探针
+### 6.2.6 启动探针(startup probe)
 
+默认的存活探针，会设置预留20~30s，让应用启动起来。如果应用启动的太慢，会导致重启。如果重启也很慢，会导致再次重启，最终变成重启地狱。
+
+为了避免这种情况，可以把`initialDelaySeconds`, `periodSeconds` 和 `failureThreshold`设置大一点。这样设置不太好。
+
+所以我们需要引入启动探针。启动探针只会在容器启动后执行一次，启动成功后，k8s就会使用存活探针了。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-startup-probe
+spec:
+  containers:
+    - name: kubia
+      image: luksa/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+      startupProbe:
+        httpGet:
+          path: /
+          port: http
+        periodSeconds: 10
+        failureThreshold: 12
+      livenessProbe:
+        httpGet:
+          path: /
+          port: http
+        periodSeconds: 5
+        failureThreshold: 1
+    - name: envoy
+      image: luksa/kubia-ssl-proxy:1.0
+      ports:
+        - name: https
+          containerPort: 8443
+        - name: admin
+          containerPort: 9901
+      livenessProbe:
+        httpGet:
+          path: /ready
+          port: admin
+        initialDelaySeconds: 10
+        periodSeconds: 3
+        timeoutSeconds: 2
+        failureThreshold: 5
+```
+
+启动探针和存活探针，使用相同的路由`/`。应用启动后120s后，才会调用存活探针。启动后，每5s调用一次存活探针。
+
+下图描述了两种探针的活动：
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426201719.png)
