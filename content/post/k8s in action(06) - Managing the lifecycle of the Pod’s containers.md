@@ -211,3 +211,54 @@ kubectl get po kubia-ssl -o json | jq .status.containerStatuses
 
 ### 6.2.3 HTTP GET探针
 
+在下面的清单中，kubia应用设置了最简单的HTTP GET探针。请求8080端口，`/`路由，如果响应状态码在200~399，该应用就是健康状态。默认情况下，每10s发送一次请求，如果没有在1s内响应，认为请求失败。连续失败三次，该应用高就认为是不健康的，会被终止掉。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-liveness
+spec:
+  containers:
+    - name: kubia
+      image: qiaocc/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 8080
+    - name: envoy
+      image: luksa/kubia-ssl-proxy:1.0
+      ports:
+        - name: https
+          containerPort: 8443
+        - name: admin
+          containerPort: 9901
+      livenessProbe:
+        httpGet:
+          path: /ready
+          port: admin
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 3
+```
+
+Envoy代理提供了一个`/ready`路由，暴露其状态。我们打开Envoy管理节点，请求`ready`路由，查看状态。envoy应用的探针，还配置了其他的属性：
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426161247.png)
+
+`initialDelaySeconds`：容器启动后多久，到第一次检测的时间间隔
+
+`periodSeconds`：两次检测的时间间隔
+
+`timeoutSeconds`：超时时间
+
+`failureThreshold`：失败极限次数。超过这个极限次数，就会认为服务不健康。
+
+
+
+
+
