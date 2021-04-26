@@ -188,3 +188,26 @@ kubectl get po kubia-ssl -o json | jq .status.containerStatuses
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110026.png)
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110226.png)
+
+
+
+### 6.2.2 使用存活探针检查容器健康状况
+
+前面的章节中，我们已经知道，当应用异常退出时，k8s会自动重启。但是有些情况下，应用虽然没有退出，但是也有可能处于异常状态。例如，java程序内存泄露，出现OutOfMemoryErrors错误，jvm进程没有退出，但是应用已经无法正常使用了。k8s也需要处理类似这样的情况。
+
+应用本身，可以通过捕获异常来解决类似的问题。但是如果出现无限循环、死锁等情况，应用不好处理的情况下，需要k8s来帮助重启应用。
+
+#### 存活探针（liveness probes）
+
+我们可以为每个容器定义存活探针，k8s会周期性的询问探针，该容器是否正常。如果不正常，容器就会被重启掉。
+
+类型：
+
+`HTTP GET`探针：发送http get请求，响应状态码为2xx或3xx为正常，其他状态码或未响应为异常。
+
+`TCP Socket`探针：建立tcp连接，建立成功为正常。
+
+`Exex`探针：执行命令，exit code等于0为正常，非0异常。
+
+### 6.2.3 HTTP GET探针
+
