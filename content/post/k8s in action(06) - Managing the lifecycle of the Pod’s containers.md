@@ -1,5 +1,5 @@
 ---
-![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110026.png)![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426105119.png)title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
+title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
 date: 2021-04-22T18:13:42+08:00
 draft: false
 tags: ["k8s"]
