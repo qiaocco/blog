@@ -293,3 +293,62 @@ kubectl get po kubia-liveness
 State的started字段，表示新容器启动时间。
 
 Last State表示老容器的状态。Exit Code等于0，代表容器平缓结束。如果是被kill的话，exit code=137
+
+
+
+### 6.2.5 使用exec和tcpSocket探针
+
+#### tcpSocket探针
+
+配置文件：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-liveness-tcp-socket
+spec:
+  containers:
+    - name: kubia
+      image: qiaocc/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+      livenessProbe:
+        tcpSocket:
+          port: 8080
+        periodSeconds: 2
+        failureThreshold: 1
+
+```
+
+这个探针，会检查8080端口是否能建立tcp连接。
+
+#### exec探针
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-liveness-exec
+spec:
+  containers:
+    - name: kubia
+      image: qiaocc/kubia:1.0
+      ports:
+        - name: http
+          containerPort: 8080
+      livenessProbe:
+        exec:
+          command:
+            - /usr/bin/healthcheck
+        periodSeconds: 1
+        failureThreshold: 1
+```
+
+exec探针会调用/usr/bin/healthcheck命令，检查exec code是否为0.
+
+
+
+### 6.2.6 启动探针
+
