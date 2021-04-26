@@ -1,5 +1,5 @@
 ---
-title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110026.png)![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426105119.png)title: "k8s in action(06) - Managing the lifecycle of the Pod’s containers"
 date: 2021-04-22T18:13:42+08:00
 draft: false
 tags: ["k8s"]
@@ -144,3 +144,47 @@ kubectl get events -w
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210425195047.png)
 
 pod的状态从`Running`到`NotReady` 、`CrashLoopBackOff`，最终变为`Running`。
+
+从图中可以看到，k8s所谓的“自动重启”，并不是真正意义上的重启，而是原来的pod退出后，再创建一个新的pod。重启后，写入容器的文件系统中的数据都会丢失。如果想要保存数据，需要创建Volume。重启期间，初始化容器（init containers)不会再次执行。
+
+#### 重启策略
+
+默认情况下，不管容器怎么退出，exit code是0还是非0，k8s都会重启容器。可以通过`restartPolicy`字段，配置重启的策略。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426104635.png)
+
+`Always`：默认设置。不管exit code是什么，总是重启。
+
+`OnFailure`：exit code是非0（代表失败）时重启
+
+`Never`：即使失败的情况下也不重启
+
+
+
+`restartPolicy`是pod级别的属性，pod下所有容器都遵循这个策略。不能给单个pod配置`restartPolicy`属性。
+
+#### 重启的时间间隔
+
+如果多次调用Envoy的 `/quitquitquit`接口，你会发现，重启越来越慢了。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426105119.png)
+
+
+
+第一次调用，容器立马重启。下一次调用，容器会等待一定的时间才会重启。时间间隔为20, 40, 80,160s，之后会变成5分钟。这种时间间隔的机制叫做`指数级别的补偿`（exponential back-off）。最差的情况下，需要等待5min之后，才会重启。
+
+Note
+
+```
+当容器正常运行10mins后，时间间隔会被重置为0。这个时候再调用`/quitquitquit`接口，立马就会重启。
+```
+
+查看补偿值：
+
+```bash
+kubectl get po kubia-ssl -o json | jq .status.containerStatuses
+```
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110026.png)
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110226.png)
