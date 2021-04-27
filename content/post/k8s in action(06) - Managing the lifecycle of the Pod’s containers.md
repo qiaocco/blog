@@ -422,3 +422,72 @@ spec:
 #### 避免重试循环
 
 让存活探针尽量简单，不要在探针处理器内部，写重试逻辑。使用k8s默认的重试机制就好。
+
+
+
+## 6.3 在容器启停时执行额外的操作
+
+前面的章节中介绍过，init容器可以在pod声明周期前，运行额外的容器。你可能想在每次运行的启停前后，执行额外的操作。你可以增加`生命周期钩子`（lifecycle hooks）。目前有两种钩子：
+
+`post-start`钩子：容器启动前执行
+
+`pre-stop`钩子：容器停止前执行
+
+每个容器，可以配置自己的钩子。之前的init 容器，只能配置在pod级别。
+
+![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210427104219.png)
+
+跟存活探针一样，lifecycle hooks也可以做：
+
+- 在容器中执行命令
+- 向容器发送http get请求
+
+```
+Note：
+lifecycle hooks和存活探针一样，都只能应用到常规容器，不能应用到init容器。
+lifecycle hooks还不支持tcpSocket处理器。
+```
+
+### 6.3.1 使用post-start钩子
+
+post-start钩子在容器创建后执行，你可以使用exec执行命令，或者发送http get请求。
+
+如果你是应用的作者，那么这些操作在应用内部就可以完成。但是如果你不能修改容器中的代码，你就可以使用post-start钩子完成类似的任务。
+
+下面我们做一个联系，会用到`fortune`命令，这个命令作用是打印一条名言警句。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-poststart
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      lifecycle:
+        postStart:
+          exec:
+            command:
+              - sh
+              - -c
+              - "apk add fortune && fortune > /usr/share/nginx/html/quote"
+      ports:
+        - name: http
+          containerPort: 80
+```
+
+当容器启动时，会调用postStart钩子，`fortune`会打印一句话，写入文件。nginx作为服务器，展示文件内容。
+
+启动：
+
+```bash
+k apply -f fortune-poststart.yaml
+# 端口转发。本地8080->容器80
+kubectl port-forward fortune-poststart 8080:80
+# 访问
+curl http://localhost:8080/quote
+```
+
+#### 
+
