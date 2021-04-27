@@ -454,6 +454,8 @@ post-start钩子在容器创建后执行，你可以使用exec执行命令，或
 
 如果你是应用的作者，那么这些操作在应用内部就可以完成。但是如果你不能修改容器中的代码，你就可以使用post-start钩子完成类似的任务。
 
+#### exec类型
+
 下面我们做一个联系，会用到`fortune`命令，这个命令作用是打印一条名言警句。
 
 ```yaml
@@ -489,5 +491,52 @@ kubectl port-forward fortune-poststart 8080:80
 curl http://localhost:8080/quote
 ```
 
-#### 
+#### http get类型
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poststart-httpget
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      lifecycle:
+        postStart:
+          httpGet:
+            port: 80
+            path: /warmup
+      ports:
+        - name: http
+          containerPort: 80
+```
+
+httpGet除了可以配置port，path参数，还可以配置`scheme` (`HTTP` or `HTTPS`) ，`host`。注意`host`参数不要设置成`localhost`，`localhost`指的是node，而不是pod。
+
+http get钩子也是在容器启动时就运行了，这会导致一个问题：如果进程启动比较慢，钩子运行失败，容器就会重启。比如下面的例子：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poststart-httpget-slow
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      command:
+        - sh
+        - -c
+        - "sleep 1; nginx"
+      lifecycle:
+        postStart:
+          httpGet:
+            port: 80
+            path: /warmup
+      ports:
+        - name: http
+          containerPort: 80
+```
+
+如果响应出现异常的状态码，例如404，k8s不认为钩子执行失败。所以要确保你配置的url是正确的，不然可能导致什么都没做。
