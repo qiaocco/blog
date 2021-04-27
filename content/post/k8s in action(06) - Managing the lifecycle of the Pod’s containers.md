@@ -540,3 +540,53 @@ spec:
 ```
 
 如果响应出现异常的状态码，例如404，k8s不认为钩子执行失败。所以要确保你配置的url是正确的，不然可能导致什么都没做。
+
+### 6.3.2 pre-stop钩子
+
+pre-stop钩子在容器关闭之前调用。通常会发送`TERM`信号去关闭进程。pre-stop钩子通常用于平滑关闭容器，或者执行额外的操作。
+
+Nginx收到`TERM`信号后，会关闭连接。正在处理的请求也会被关闭。我们可以用`nginx -s quit`平滑关闭。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-prestop
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - sh
+          - -c
+          - "apk add fortune && fortune > /usr/share/nginx/html/quote"
+      preStop:
+        exec:
+          command:
+          - nginx
+          - -s
+          - quit
+    ports:
+    - name: http
+      containerPort: 80
+```
+
+```
+Note
+应用没有收到TERM信号？
+很多开发者在钩子中，发送了TERM信号，但是应用没有收到，这是为什么呢？
+可能是在Dockerfile中使用了ENTRYPOINT或者CMD。
+
+The exec form is: ENTRYPOINT ["/myexecutable", "1st-arg", "2nd-arg"]
+The shell form is: ENTRYPOINT /myexecutable 1st-arg 2nd-arg
+
+exec模式：直接调用可执行文件
+shell模式：先启动shell，作为root进程，然后在执行二进制文件，作为其子进程。shell进程接收到TERM信号，但是不会传递给子进程。
+
+这种情况下，需要改成exec模式
+```
+
+生命周期钩子，作用的对象是容器，而不是pod。
