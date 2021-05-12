@@ -15,7 +15,7 @@ tags: ["k8s"]
 
 
 
-# 7.1 引入Volume
+## 7.1 引入Volume
 
 一个pod就像逻辑上的一台计算机，上面运行着多个应用。应用可能包含多个进程，它们共享着CPU，内存、网络接口等。在真实的计算机上，多个进程使用的是同一个文件系统。但是在pod中不是这样的。每个容器的文件系统都是隔离的。
 
@@ -78,3 +78,33 @@ volume是绑定到pod的，它的生命周期和pod一样。但是，如果我�
 最简单的情况是，持久化volume可以是worker node的文件系统。pod位于同一个node。
 
 当持久化volume是nas时，pod可以位于不同的node。
+
+### 7.1.2 volume的类型
+
+`emptyDir`：最简单的类型。老版本有`gitRepo`类型，现在已经废弃掉了。可以使用`emptyDir`类型替代它，然后使用init容器初始化拉代码。
+
+`hostPath`：使用worker node的文件系统挂载
+
+`nfs`：NFS共享挂载
+
+
+
+## 7.2 使用volume
+
+先来介绍最简单的类型`emptyDir`。它用于在容器重启期间持久化数据。
+
+### 7.2.1 使用`emptyDir`
+
+上一章，我们用过fortune pod，它使用post-start钩子，将随机的名人名言写入文件，然后nginx server起页面。文件保存在容器的文件系统中，当容器重启后，文件会丢失。
+
+```bash
+# 启动
+kubectl apply -f fortune-no-volume.yaml
+# 查看文件内容 
+kubectl exec fortune-no-volume -- cat /usr/share/nginx/html/quote
+
+kubectl exec fortune-no-volume -- nginx -s stop
+# 再次查看文件 
+kubectl exec fortune-no-volume -- cat /usr/share/nginx/html/quote
+```
+
