@@ -102,9 +102,45 @@ volume是绑定到pod的，它的生命周期和pod一样。但是，如果我�
 kubectl apply -f fortune-no-volume.yaml
 # 查看文件内容 
 kubectl exec fortune-no-volume -- cat /usr/share/nginx/html/quote
-
+# 关闭nginx，导致容器重启
 kubectl exec fortune-no-volume -- nginx -s stop
 # 再次查看文件 
 kubectl exec fortune-no-volume -- cat /usr/share/nginx/html/quote
+```
+
+重启后，再次查看文件，文件内容改变了。这时候，你需要`emptyDir`保存文件。
+
+#### 使用emptyDir类型
+
+需要修改两个地方：
+
+1. 在pod定义中增加`emptyDir` volume定义
+2. 把volume挂载到容器
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-emptydir
+spec:
+  volumes:
+    - name: content
+      emptyDir: {}
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      volumeMounts:
+        - name: content
+          mountPath: /usr/share/nginx/html
+      lifecycle:
+        postStart:
+          exec:
+            command:
+              - sh
+              - -c
+              - "ls /usr/share/nginx/html/quote || (apk add fortune && fortune > /usr/share/nginx/html/quote)"
+      ports:
+        - name: http
+          containerPort: 80
 ```
 
