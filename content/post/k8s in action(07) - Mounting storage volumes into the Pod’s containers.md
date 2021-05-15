@@ -123,13 +123,13 @@ kind: Pod
 metadata:
   name: fortune-emptydir
 spec:
-  volumes:
+  volumes:	# 定义volume
     - name: content
       emptyDir: {}
   containers:
     - name: nginx
       image: nginx:alpine
-      volumeMounts:
+      volumeMounts:	# 挂载volume
         - name: content
           mountPath: /usr/share/nginx/html
       lifecycle:
@@ -142,5 +142,27 @@ spec:
       ports:
         - name: http
           containerPort: 80
+```
+
+#### 配置volume
+
+volume包含name字段和类型字段。
+
+```yaml
+  volumes:	# 定义volume
+    - name: content
+      emptyDir: {}
+```
+
+除此之外，还可以包含：
+
+`medium`：存储截止的类型。默认是node节点的磁盘上。
+
+`sizeLimit`：存储大小限制。
+
+#### 查看挂载点
+
+```bash
+kubectl exec fortune-emptydir -- mount --list | grep nginx/html
 ```
 
