@@ -31,4 +31,4 @@ jobs:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }} # 默认情况下，不能把代码推送到其他仓库。如果确实要推送，需要设置一个deploy key。设置方法见文章末尾的链接。
           external_repository: qiaocco/qiaocco.github.io # 静态文件仓库地址
           publish_branch: master # default: gh-pages	# 推送的分支
-          cname: blog.qiaocci.com # 自定义域名
+          cname: blog.qiaocco.com # 自定义域名
