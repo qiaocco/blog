@@ -87,6 +87,3 @@ jobs:
 1.  actions-hugo 文档：https://github.com/peaceiris/actions-hugo
 2.  如何设置deploy key：https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-create-ssh-deploy-key
 3. https://ruddra.com/hugo-deploy-static-page-using-github-actions/
-
-
-
