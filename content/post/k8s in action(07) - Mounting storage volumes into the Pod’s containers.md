@@ -166,3 +166,55 @@ volume包含name字段和类型字段。
 kubectl exec fortune-emptydir -- mount --list | grep nginx/html
 ```
 
+
+
+### 7.2.2 使用`emptyDir`在容器间共享文件
+
+`emptyDir`经常用于在同一个pod的不同容器中共享文件。
+
+fortune pod一直展示相同的内容。我们更新一下，让fortune每30s修改一次内容。你要修改一下yaml配置。
+
+```yaml
+# fortune.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune
+spec:
+  volumes:
+  - name: content
+    emptyDir: {}
+  containers:
+  - name: fortune
+    image: luksa/fortune-writer:1.0
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: content
+      mountPath: /var/local/output
+  - name: nginx
+    image: nginx:alpine
+    volumeMounts:
+    - name: content
+      mountPath: /usr/share/nginx/html
+      readOnly: true
+    ports:
+    - name: http
+      containerPort: 80
+```
+
+pod包含两个容器和一个volume。fortune容器把内容写入`/var/local/output`目录，nginx从`/usr/share/nginx/html`读取内容。
+
+#### 运行容器
+
+运行pod之后，fortune每30s会写入文件。当运行正常以后，使用`kubectl port-forward`访问。
+
+或者可以进入pod查看文件内容：
+
+```shell
+kubectl exec fortune -c fortune -- cat /var/local/output/quote
+kubectl exec fortune -c nginx -- cat /usr/share/nginx/html/quote
+```
+
+#### 限制volume大小
+
+通过设置`sizeLimit`字段，限制大小。
