@@ -1,5 +1,5 @@
 ---
-title: "k8s in action(07) - Mounting storage volumes into the Pod’s containers"
+title: "k8s in action(07) Mounting storage volumes into the Pod’s containers"
 date: 2021-04-28T14:15:49+08:00
 draft: false
 tags: ["k8s"]
