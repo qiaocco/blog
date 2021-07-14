@@ -99,9 +99,13 @@ Step2：输入过滤条件获取待分析数据包列表 `ip.addr == 122.51.107.
    http contains qiaocc
    ```
 
-3. 过滤协议：直接输入协议， tcp， arp等
+3. 过滤协议：直接输入协议， tcp， arp等(不需要加引号)
 
-注意：过滤器不需要加引号
+4. 过滤info字段：
+
+   <img src="https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210714170743.png" style="zoom: 50%;" />
+
+   
 
 
 
