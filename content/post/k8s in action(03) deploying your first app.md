@@ -83,7 +83,7 @@ minikube dashboard
 使用命令行创建deployment
 
 ```bash
-kubectl create deployment kubia --image=qiaocc/kubia:1.0
+k create deployment kiada --image qiaocc/kiada:0.1
 ```
 
 查看deployment:
@@ -145,7 +145,7 @@ kubectl describe pod
 一种办法是，创建Service，指定类型是LoadBalancer。
 
 ```bash
-kubectl expose deployment kubia --type=LoadBalancer --port 8080
+kubectl expose deployment kiada --type=LoadBalancer --port 8080
 ```
 
 这个命令会：
@@ -190,7 +190,7 @@ minikube service kubia --url
 现在我们运行了一个单实例的应用。如果突然有很多人访问应用，那么单实例就抗不住大量的流量。这时候，你需要额外的实例，去分担整个流量。这就是水平扩展。
 
 ```bash
-kubectl scale deployment kubia --replicas=3
+kubectl scale deployment kiada --replicas=3
 ```
 
 你只需要告诉k8s，最终想要达到的效果是， 有3个kubia的副本。k8s就会自动扩展。
@@ -210,9 +210,9 @@ kubia   3/3     3            3           4h56m
 ```bash
 $ k get pods
 NAME                     READY   STATUS    RESTARTS   AGE
-kubia-5bd75b8fdd-ch24v   1/1     Running   0          10m
-kubia-5bd75b8fdd-kd49l   1/1     Running   0          5h1m
-kubia-5bd75b8fdd-l8g5j   1/1     Running   0          10m
+kiada-5c7544c656-46hfr   1/1     Running   0          64s
+kiada-5c7544c656-g8mnr   1/1     Running   0          64s
+kiada-5c7544c656-vwtp5   1/1     Running   0          24m
 ```
 
 所有pod都已经ready，状态是Running。
@@ -223,6 +223,10 @@ kubia-5bd75b8fdd-l8g5j   1/1     Running   0          10m
 
 ```bash
 k get pods -o wide
+NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE                       NOMINATED NODE   READINESS GATES
+kiada-5c7544c656-46hfr   1/1     Running   0          80s   10.74.0.71   cn-shanghai.172.19.85.52   <none>           <none>
+kiada-5c7544c656-g8mnr   1/1     Running   0          80s   10.74.0.72   cn-shanghai.172.19.85.52   <none>           <none>
+kiada-5c7544c656-vwtp5   1/1     Running   0          24m   10.74.0.70   cn-shanghai.172.19.85.52   <none>           <none>
 ```
 
 
@@ -230,7 +234,15 @@ k get pods -o wide
 多运行几次，观察一下响应：
 
 ```bash
-$ curl 35.246.179.22:8080
+$ curl 47.101.61.136:8080
+
+Kiada version 0.1. Request processed by "kiada-5c7544c656-46hfr". Client IP: ::ffff:172.19.85.53
+ ~/.kube  curl 47.101.61.136:8080
+Kiada version 0.1. Request processed by "kiada-5c7544c656-46hfr". Client IP: ::ffff:172.19.85.53
+ ~/.kube  curl 47.101.61.136:8080
+Kiada version 0.1. Request processed by "kiada-5c7544c656-g8mnr". Client IP: ::ffff:10.74.0.65
+ ~/.kube  curl 47.101.61.136:8080
+Kiada version 0.1. Request processed by "kiada-5c7544c656-46hfr". Client IP: ::ffff:172.19.85.53
 ```
 
 我们会发现， 请求由不同的pod来处理。
