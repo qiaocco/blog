@@ -135,33 +135,28 @@ kubectl get events
 1. 获取pod的ip
 
    ```bash
-   kubectl get pod kiada -o wide
-   # output
-   NAME    READY   STATUS    RESTARTS   AGE    IP           NODE       NOMINATED NODE   READINESS GATES
-   kiada   1/1     Running   2          6d2h   172.17.0.8   minikube   <none>           <none>
+   NAME    READY   STATUS    RESTARTS   AGE   IP            NODE    NOMINATED NODE   READINESS GATES
+   kiada   1/1     Running   0          12m   10.244.1.37   node1   <none>           <none>
    ```
-
-   输出结果显示，kiada pod的ip是`172.17.0.8`
+   
+   输出结果显示，kiada pod的ip是`10.244.1.37`
 
    在k8s中，同一个node的不同pod之间可以联通，不通node的不同pod也可以联通
 
-2.  ssh登录pod所在的node，发起请求。
+2.  在master节点发起请求。
 
    ```
-   minikubt ssh
-   curl 172.17.0.8:8000
+   curl 10.244.1.37:8000
    ```
 
-应用场景：出现连接问题时，这种方法是结局问题的最短路径。
+应用场景：出现连接问题时，这种方法是最简单的办法。
 
 
 
 #### 方法二：从一次性的pod连接
 
 ```bash
-kubectl run --image=tutum/curl -it --restart=Never --rm client-pod
-
-curl 172.17.0.8:8000
+kubectl run --image=curlimages/curl -it --restart=Never --rm client-pod curl 10.244.1.37:8080
 ```
 
 ​	这个命令创建了一次性的pod，在退出时，pod自动销毁。
@@ -299,6 +294,7 @@ Envoy还提供了web界面。
 Envoy官方提供了Docker镜像，但是需要一些额外的配置。本书的作者做好配置了，我们直接拿来用就好了。
 
 ```yaml
+# kiada-ssl.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -426,8 +422,6 @@ kubectl exec -it kiada-init-slow -c init-demo -- sh
 
 
 ## 5.6 删除操作
-
-
 
 ```bash
 # 删除pod
