@@ -150,7 +150,7 @@ kubectl expose deployment kiada --type=LoadBalancer --port 8080
 
 这个命令会：
 
-- 把所有属于kubia的pod，作为服务暴露出去。
+- 把所有属于kiada的pod，作为服务暴露出去。
 - 外部用户通过负载均衡访问
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210326185205.png)
@@ -180,7 +180,7 @@ curl 35.246.179.22:8080
 minikube如何访问服务呢？
 
 ```bash
-minikube service kubia --url
+minikube service kiada --url
 ```
 
 
@@ -193,14 +193,14 @@ minikube service kubia --url
 kubectl scale deployment kiada --replicas=3
 ```
 
-你只需要告诉k8s，最终想要达到的效果是， 有3个kubia的副本。k8s就会自动扩展。
+你只需要告诉k8s，最终想要达到的效果是， 有3个kiada的副本。k8s就会自动扩展。
 
 这是k8s中的一个基础原则。你只要告诉k8s，最终想实现的效果，k8s就会去实现它。你不用关心k8s如何实现的。k8s会自动检查当前状态，和最终实现的状态，它们两者的差异，最终会决定如何实现它。
 
 ```bash
 $ k get deployments
 NAME    READY   UP-TO-DATE   AVAILABLE   AGE
-kubia   3/3     3            3           4h56m
+kiada   3/3     3            3           4h56m
 ```
 
 3个实例已经up-to-date, 已经ready。

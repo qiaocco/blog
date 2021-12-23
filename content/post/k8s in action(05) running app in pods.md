@@ -1,5 +1,5 @@
 ---
-title: "k8s in action(05) running app in k8s"
+title: "k8s in action(05) running app in pods"
 date: 2021-04-14T23:11:31+08:00
 draft: false
 tags: ["k8s"]
@@ -55,6 +55,8 @@ pod内的容器，同时也共享hostname。
 
 ### 5.1.2 Organizing containers into pods
 
+你可以把pod理解为独立的电脑.
+
 在虚拟机时代，一台虚拟机可以运行多个应用。但是在使用pod时，建议一个pod只运行一个应用。应用的每个进程，运行在不同的容器里。
 
 为什么不建议多个应用运行在同一个pod？
@@ -89,15 +91,15 @@ pod内的容器，同时也共享hostname。
 前面的章节中，我们已经学会使用命令行创建pod。这一章我们来学习使用配置文件创建pod，方便管理。
 
 ```yaml
-# kubia.yaml
+# kiada.yaml
 apiVersion: v1 # api版本
 kind: Pod # 类型
 metadata:
-  name: kubia # pod名称
+  name: kiada # pod名称
 spec:
   containers:
-    - name: kubia # 容器名称
-      image: qiaocc/kubia:1.0 # 镜像
+    - name: kiada # 容器名称
+      image: qiaocc/kiada:1.0 # 镜像
       ports:
         - containerPort: 8080 # app监听端口
 ```
@@ -108,13 +110,13 @@ spec:
 
 ```bash
 # 运行
-kubectl apply -f kubia.yaml
+kubectl apply -f kiada.yaml
 
 # 查看pod状态, -o wide 查看更多， -o yaml输出yaml格式
-kubectl get pod kubia
+kubectl get pod kiada
 
 # 查看pod详情
-kubectl describe pod kubia
+kubectl describe pod kiada
 
 # 查看创建pod时，发生的事件
 kubectl get events
@@ -133,13 +135,13 @@ kubectl get events
 1. 获取pod的ip
 
    ```bash
-   kubectl get pod kubia -o wide
+   kubectl get pod kiada -o wide
    # output
    NAME    READY   STATUS    RESTARTS   AGE    IP           NODE       NOMINATED NODE   READINESS GATES
-   kubia   1/1     Running   2          6d2h   172.17.0.8   minikube   <none>           <none>
+   kiada   1/1     Running   2          6d2h   172.17.0.8   minikube   <none>           <none>
    ```
 
-   输出结果显示，kubia pod的ip是`172.17.0.8`
+   输出结果显示，kiada pod的ip是`172.17.0.8`
 
    在k8s中，同一个node的不同pod之间可以联通，不通node的不同pod也可以联通
 
@@ -175,7 +177,7 @@ curl 172.17.0.8:8000
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210301230643.png)
 
 ```
-kubectl port-forward kubia 8080
+kubectl port-forward kiada 8080
 
 # 本地运行
 curl localhost:8080
@@ -194,17 +196,17 @@ curl先连接到代理，代理连接到API server，再连接到kubelet，然�
 ### 5.3.2 查看日志
 
 ```bash
-kubectl logs kubia
+kubectl logs kiada
 # 实时日志
-kubectl logs kubia -f
+kubectl logs kiada -f
 # 显示时间戳
-kubectl logs kubia --timestamps=true
+kubectl logs kiada --timestamps=true
 # 最近两分钟的日志
-kubectl logs kubia --since=2m
+kubectl logs kiada --since=2m
 # 指定开始时间
-kubectl logs kubia --since-time=2020-02-01T09:50:00Z
+kubectl logs kiada --since-time=2020-02-01T09:50:00Z
 # 显示最近10行
-kubectl logs kubia --tail=10
+kubectl logs kiada --tail=10
 ```
 
 k8s为每个容器都单独保存了日志。日志通常存放在`/var/log/containers`目录。pod删除后，所有的日志也会删除。所以你需要指定一个中心化的日志系统。
@@ -218,22 +220,22 @@ k8s中，通常应用会把日志写入标准输出及标准错误。如果不�
 复制文件到本地：
 
 ```bash
-kubectl cp kubia:/etc/hosts /tmp/kubia-hosts
+kubectl cp kiada:/etc/hosts /tmp/kiada-hosts
 ```
 
 复制文件到容器：
 
 ```bash
-kubectl cp /etc/hosts kubia:/tmp/kubia-hosts
+kubectl cp /etc/hosts kiada:/tmp/kiada-hosts
 ```
 
 ### 5.3.4 在容器中执行命令
 
 ```bash
 # 方法一：直接执行命令
-kubectl exec kubia -- ps aux
+kubectl exec kiada -- ps aux
 # 方法二：进入交互shell
-kubectl exec -it kubia -- bash
+kubectl exec -it kiada -- bash
 ```
 
 注意：方法二并不适用于所有情况。有些容器，基于安全方面，或者容器大小方面的考量，会舍弃很多linux二进制文件，导致很多命令无法执行。这时候，你需要一个**临时容器**（*ephemeral containers*）。这个特性还在alpha阶段，以后可能会移除。
@@ -242,24 +244,24 @@ kubectl exec -it kubia -- bash
 
 用于应用读取stdin。
 
-代码参考：`chap5/kubia-stdin-image`
+代码参考：`chap5/kiada-stdin-image`
 
 启动pod：
 
 ```bash
-kubectl apply -f kubia-stdin.yaml
+kubectl apply -f kiada-stdin.yaml
 ```
 
 端口转发：
 
 ```bash
-kubectl port-forward kubia-stdin 8080
+kubectl port-forward kiada-stdin 8080
 ```
 
 使用attach命令：
 
 ```bash
-kubectl attach -i kubia-stdin
+kubectl attach -i kiada-stdin
 ```
 
 进入命令行交互之后，输入"hello"，然后请求服务：
@@ -271,7 +273,7 @@ curl http://127.0.0.1:8080
 输出:
 
 ```
-hello, this is kubia-stdin. Your IP is ::ffff:127.0.0.1.
+hello, this is kiada-stdin. Your IP is ::ffff:127.0.0.1.
 ```
 
 这时候，greeting变量已经被修改了。
@@ -280,9 +282,9 @@ hello, this is kubia-stdin. Your IP is ::ffff:127.0.0.1.
 
 ## 5.4 在pod中运行多个容器
 
-目前kubia应用只支持http协议。我们想让它支持https协议。一种办法是通过修改代码，比较麻烦。另一种方法是增加sidecar应用，让其处理https协议。目前流行的组件是`Envoy`。Envoy是一个高性能的反向代理，它最初有Lyft开发，现在已经捐赠给了CNCF基金会，它也是`Service Mesh`的核心组件之一。
+目前kiada应用只支持http协议。我们想让它支持https协议。一种办法是通过修改代码，比较麻烦。另一种方法是增加sidecar应用，让其处理https协议。目前流行的组件是`Envoy`。Envoy是一个高性能的反向代理，它最初有Lyft开发，现在已经捐赠给了CNCF基金会，它也是`Service Mesh`的核心组件之一。
 
-### 5.4.1 扩展kubia，使用Envoy代理
+### 5.4.1 扩展kiada，使用Envoy代理
 
 扩展之后的架构如下图：
 
@@ -300,16 +302,16 @@ Envoy官方提供了Docker镜像，但是需要一些额外的配置。本书的
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-ssl
+  name: kiada-ssl
 spec:
   containers:
-    - name: kubia
-      image: qiaocc/kubia:1.0
+    - name: kiada
+      image: qiaocc/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
     - name: envoy
-      image: luksa/kubia-ssl-proxy:1.0
+      image: luksa/kiada-ssl-proxy:1.0
       ports:
         - name: https
           containerPort: 8443
@@ -317,9 +319,9 @@ spec:
           containerPort: 9901
 ```
 
-新的pod叫做kubia-ssl，包含两个容器：kubia和envoy。代理envoy增加了两个端口，8443是HTTPS端口，9901是web界面端口。
+新的pod叫做kiada-ssl，包含两个容器：kiada和envoy。代理envoy增加了两个端口，8443是HTTPS端口，9901是web界面端口。
 
-使用`kubectl apply -f kubia-ssl.yaml`命令，创建这个pod。
+使用`kubectl apply -f kiada-ssl.yaml`命令，创建这个pod。
 
 ### 5.4.3 容器交互
 
@@ -331,10 +333,10 @@ curl http://127.0.0.1:8080
 # 3. 验证https协议(自签证书，需要加--insecure)
 curl https://localhost:8443 --insecure
 # 4. 查看log
-kubectl logs kubia-ssl -c kubia
-kubectl logs kubia-ssl --all-containers
+kubectl logs kiada-ssl -c kiada
+kubectl logs kiada-ssl --all-containers
 # 5. 进入bash
-kubectl exec -it kubia-ssl -c envoy -- bash
+kubectl exec -it kiada-ssl -c envoy -- bash
 ```
 
 
@@ -372,7 +374,7 @@ init containers在主容器之前，一个接一个启动（非并行）。当�
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-init
+  name: kiada-init
 spec:
   initContainers:
     - name: init-demo
@@ -380,13 +382,13 @@ spec:
     - name: network-check
       image: qiaocc/network-connectivity-checker:1.0
   containers:
-    - name: kubia
-      image: qiaocc/kubia:1.0
+    - name: kiada
+      image: qiaocc/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
     - name: envoy
-      image: luksa/kubia-ssl-proxy:1.0
+      image: luksa/kiada-ssl-proxy:1.0
       ports:
         - name: https
           containerPort: 8443
@@ -402,7 +404,7 @@ spec:
 
 ```bash
 # 运行容器
-kubectl apply -f kubia-init.yaml
+kubectl apply -f kiada-init.yaml
 # 检查状态
 kubectl get pods -w
 kubectl get events -w
@@ -416,9 +418,9 @@ kubectl get events -w
 
 ```bash
 # 查看log。-c指定容器名字
-kubectl logs kubia-init -c network-check
+kubectl logs kiada-init -c network-check
 # 执行命令
-kubectl exec -it kubia-init-slow -c init-demo -- sh
+kubectl exec -it kiada-init-slow -c init-demo -- sh
 ```
 
 
@@ -429,11 +431,11 @@ kubectl exec -it kubia-init-slow -c init-demo -- sh
 
 ```bash
 # 删除pod
-kubectl delete po kubia
+kubectl delete po kiada
 # 删除多个pod
-kubectl delete po kubia-init kubia-init-slow
+kubectl delete po kiada-init kiada-init-slow
 # 使用配置文件删除
-kubectl delete -f kubia-ssl.yaml
+kubectl delete -f kiada-ssl.yaml
 # 删除目录下所有yaml配置
 kubectl delete -f Chapter05/
 

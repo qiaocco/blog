@@ -41,14 +41,14 @@ tags: ["k8s"]
 例子：
 
 ```bash
-kubectl apply -f kubia.yaml
-kubectl get po kubia -o yaml | grep phase # phase: Running
+kubectl apply -f kiada.yaml
+kubectl get po kiada -o yaml | grep phase # phase: Running
 ```
 
 还可以使用`jq`工具来格式化：
 
 ```bash
-kubectl get po kubia -o json | jq .status.phase
+kubectl get po kiada -o json | jq .status.phase
 ```
 
 
@@ -78,7 +78,7 @@ kubectl get po kubia -o json | jq .status.phase
 如果有的阶段未完成，可以查看原因：
 
 ```bash
-kubectl get po kubia -o json | jq .status.conditions
+kubectl get po kiada -o json | jq .status.conditions
 ```
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424105122.png)
@@ -106,7 +106,7 @@ kubectl get po kubia -o json | jq .status.conditions
 `Unknown`：未知。
 
 ```bash
-kubectl describe po kubia
+kubectl describe po kiada
 ```
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210424110135.png)
@@ -120,8 +120,8 @@ kubectl describe po kubia
 pod调度到node后，kubelet会启动容器。当容器意外退出时，k8s会自动重启容器。
 
 ```bash
-kubectl apply -f kubia-ssl.yaml
-kubectl port-forward kubia-ssl 8080 8443 9901
+kubectl apply -f kiada-ssl.yaml
+kubectl port-forward kiada-ssl 8080 8443 9901
 
 # 观察
 kubectl get pods -w
@@ -182,7 +182,7 @@ Note
 查看补偿值：
 
 ```bash
-kubectl get po kubia-ssl -o json | jq .status.containerStatuses
+kubectl get po kiada-ssl -o json | jq .status.containerStatuses
 ```
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426110026.png)
@@ -211,17 +211,17 @@ kubectl get po kubia-ssl -o json | jq .status.containerStatuses
 
 ### 6.2.3 HTTP GET探针
 
-在下面的清单中，kubia应用设置了最简单的HTTP GET探针。请求8080端口，`/`路由，如果响应状态码在200~399，该应用就是健康状态。默认情况下，每10s发送一次请求，如果没有在1s内响应，认为请求失败。连续失败三次，该应用高就认为是不健康的，会被终止掉。
+在下面的清单中，kiada应用设置了最简单的HTTP GET探针。请求8080端口，`/`路由，如果响应状态码在200~399，该应用就是健康状态。默认情况下，每10s发送一次请求，如果没有在1s内响应，认为请求失败。连续失败三次，该应用高就认为是不健康的，会被终止掉。
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-liveness
+  name: kiada-liveness
 spec:
   containers:
-    - name: kubia
-      image: qiaocc/kubia:1.0
+    - name: kiada
+      image: qiaocc/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
@@ -230,7 +230,7 @@ spec:
           path: /
           port: 8080
     - name: envoy
-      image: luksa/kubia-ssl-proxy:1.0
+      image: luksa/kiada-ssl-proxy:1.0
       ports:
         - name: https
           containerPort: 8443
@@ -263,12 +263,12 @@ Envoy代理提供了一个`/ready`路由，暴露其状态。我们打开Envoy�
 ### 6.2.4 实际操作
 
 ```bash
-kubectl apply -f kubia-ssl.yaml
-kubectl port-forward kubia-ssl 8080 8443 9901
-# 观察kubia应用
-kubectl logs kubia-liveness -c kubia -f
+kubectl apply -f kiada-ssl.yaml
+kubectl port-forward kiada-ssl 8080 8443 9901
+# 观察kiada应用
+kubectl logs kiada-liveness -c kiada -f
 # 观察envoy
-kubectl exec kubia-liveness -c envoy -- tail -f /var/log/envoy.admin.log
+kubectl exec kiada-liveness -c envoy -- tail -f /var/log/envoy.admin.log
 ```
 
 主动将健康检查配置为失败：
@@ -285,7 +285,7 @@ kubectl get events -w
 
 ```bash
 # 查看RESTARTS，重启次数
-kubectl get po kubia-liveness
+kubectl get po kiada-liveness
 ```
 
 ![](https://cdn.jsdelivr.net/gh/qiaocci/img-repo@master/20210426163955.png)
@@ -306,11 +306,11 @@ Last State表示老容器的状态。Exit Code等于0，代表容器平缓结束
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-liveness-tcp-socket
+  name: kiada-liveness-tcp-socket
 spec:
   containers:
-    - name: kubia
-      image: qiaocc/kubia:1.0
+    - name: kiada
+      image: qiaocc/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
@@ -330,11 +330,11 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-liveness-exec
+  name: kiada-liveness-exec
 spec:
   containers:
-    - name: kubia
-      image: qiaocc/kubia:1.0
+    - name: kiada
+      image: qiaocc/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
@@ -362,11 +362,11 @@ exec探针会调用/usr/bin/healthcheck命令，检查exec code是否为0.
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubia-startup-probe
+  name: kiada-startup-probe
 spec:
   containers:
-    - name: kubia
-      image: luksa/kubia:1.0
+    - name: kiada
+      image: luksa/kiada:1.0
       ports:
         - name: http
           containerPort: 8080
@@ -383,7 +383,7 @@ spec:
         periodSeconds: 5
         failureThreshold: 1
     - name: envoy
-      image: luksa/kubia-ssl-proxy:1.0
+      image: luksa/kiada-ssl-proxy:1.0
       ports:
         - name: https
           containerPort: 8443
