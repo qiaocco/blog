@@ -1,4 +1,4 @@
-name: github pages # 任务名称
+name: github pages # 任务名称 
 
 on: # 什么情况下会触发任务，为了方便调试，我写的情况比较多，大家可以只保留push的情况。
   push:
