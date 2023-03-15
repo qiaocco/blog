@@ -9,37 +9,14 @@ tags: ["k8s"]
 
 ## 创建docker镜像
 
-创建`app.js`文件
-
-```javascript
-const http = require("http");
-const os = require("os");
-
-const listenPort = 8080;
-
-console.log("Kubia server starting...");
-console.log("Local hostname is " + os.hostname());
-console.log("Listening on port " + listenPort);
-
-var handler = function (request, response) {
-  let clientIP = request.connection.remoteAddress;
-  console.log("Received request for " + request.url + " from " + clientIP);
-  response.writeHead(200);
-  response.write("Hey there, this is " + os.hostname() + '. ');
-  response.write("Your IP is " + clientIP + '. ');
-  response.end("\n");
-}
-
-var server = http.createServer(handler)
-server.listen(listenPort)
-```
+创建`app.js`[文件](https://github.com/qiaocco/kubernetes-in-action-2nd-edition/blob/master/Chapter02/kiada-0.1/app.js)
 
 创建Dockerfile
 
 ```dockerfile
-FROM node:12
-
-ADD app.js /app.js
+FROM node:16
+COPY app.js /app.js
+COPY html/ /html
 ENTRYPOINT ["node", "app.js"]
 ```
 
@@ -47,21 +24,21 @@ ENTRYPOINT ["node", "app.js"]
 
 ```bash
 # 构建
-docker build -t kubia:latest .
+docker build -t kiada:latest .
 # 运行
-docker run --name kubia-container -p 1234:8080 -d kubia
+docker run --name kiada-container -p 1234:8080 -d kiada
 # 查看日志
-docker logs kubia-container
+docker logs kiada-container
 # 分发
 # 1. 打标签
-docker tag kubia qiaocc/kubia:1.0
+docker tag kiada qiaocc/kiada:0.1
 # 2. 推送
-docker push qiaocc/kubia:1.0
+docker push qiaocc/kiada:0.1
 # 停用
-docker stop kubia-container
+docker stop kiada-container
 # 删除容器
-docker rm kubia-container
+docker rm kiada-container
 # 删除镜像
-docker rmi kubia:latest
+docker rmi kiada:latest
 ```
 
