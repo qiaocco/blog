@@ -25,5 +25,11 @@ tags: ["blog"]
    hugo new post/first_post.md
    ```
 
+5. 运行
+
+    ```
+    hugo server
+    ```
+
 5. 自定义域名 https://gohugo.io/hosting-and-deployment/hosting-on-github/
 
